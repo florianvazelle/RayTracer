@@ -1,16 +1,22 @@
 #include "Tracer.h"
 
 Tracer::Tracer() {
-    scene.push_back(new Sphere{{0.f, 0.f, 2.f}, 1.f});
-    scene.push_back(new Sphere{{2.f, 2.f, 4.f}, 1.f});
+    primitives.push_back(new Sphere{{0.f, 0.f, 2.f}, 1.f});
+    primitives.push_back(new Sphere{{2.f, 2.f, 4.f}, 1.f});
     //scene.push_back(new Sphere{{ -0.5f, -0.5f, 1.f}, 0.2f});
-    scene.push_back(new Sphere{{-1.f, -0.5f, 2.f}, 0.75f});
+    primitives.push_back(new Sphere{{-1.f, -0.5f, 2.f}, 0.75f});
 
+    Light light;
     light.origin = {1.f, 1.f, 0.f};
+    light.diffuseColor = vec3{0.5, 0.0, 0.0};
+    light.specColor = vec3{1.0, 1.0, 1.0};
+    light.shininess = 16.0f;
+
+    lights.push_back(light);
 }
 
 Tracer::~Tracer() {
-    for (Primitive *p : scene) {
+    for (Primitive *p : primitives) {
         delete p;
     }
 }
@@ -33,40 +39,16 @@ color Tracer::Trace(const Ray &ray, int depth) {
         // 2. calcul d'une normal
         vec3 normal = intersection.primitive->CalcNormal(position);
 
-        // exo2 shadow feeler
-        Ray rayFeeler;
-        rayFeeler.origin = position;
-        rayFeeler.direction = light.origin - position;
-        Tracer::Intersection intersectionFeeler = Hit(rayFeeler);
-        bool vis = (intersectionFeeler.primitive != nullptr);
+        for(Light& l : lights) {
+            l.direction = (l.origin - position).normalize();
 
-        if (!vis) {
-            // 3. init. du nouveau rayon
-            Ray newRay;
-            newRay.origin = position + normal * EPSILON;
-            newRay.direction = normal;
+            Ray rayFeeler;
+            rayFeeler.origin = position + normal * EPSILON;
+            rayFeeler.direction = l.direction;
+            Tracer::Intersection intersectionFeeler = Hit(rayFeeler);
 
-            col = col + Trace(newRay, depth + 1);
-
-            static const vec3 diffuseColor = vec3{0.5, 0.0, 0.0};
-            static const vec3 specColor = vec3{1.0, 1.0, 1.0};
-            static const float shininess = 16.0f;
-
-            // Diffuse (Lambert)
-            light.direction = (light.origin - position).normalize();
-            float lambertian = std::max(0.f, normal.dot(light.direction));
-
-            col = col * (diffuseColor * lambertian);
-
-            // Specular
-            vec3 view_direction = ray.direction.negated().normalize();
-            vec3 halfDir = (light.direction + view_direction).normalize();
-            float specAngle = std::max(halfDir.dot(normal), 0.0f);
-            float specular = pow(specAngle, shininess);
-
-            col = col + (specColor * specular);
-        } else {
-            col = vec3{0.f, 0.f, 0.f};
+            bool vis = (intersectionFeeler.primitive == nullptr);
+            col = col + (l.diffuse(normal) + l.specular(ray, normal)) * vis;
         }
     }
 
@@ -97,7 +79,7 @@ void Tracer::Occlusion(const Ray &ray) {
 Tracer::Intersection Tracer::Hit(const Ray &ray) {
     Tracer::Intersection intersection{std::numeric_limits<float>::max(), nullptr};
 
-    for (Primitive const *p : scene) {
+    for (Primitive const *p : primitives) {
         float distance = p->Intersect(ray);
 
         if (distance > 0.f && distance < intersection.distance) {

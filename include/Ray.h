@@ -7,6 +7,6 @@ struct Ray {
         float tmin;
         vec3 direction;
         float tmax;
-        
+
         vec3 Evaluate(float dist) const;
 };

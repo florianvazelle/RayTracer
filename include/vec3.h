@@ -29,6 +29,10 @@ struct vec3 {
 		return{ x - rhs.x, y - rhs.y, z - rhs.z };
 	}
 
+	inline vec3 operator-(const float& rhs) const {
+		return{ x - rhs, y - rhs, z - rhs };
+	}
+
 	inline vec3 operator*(const vec3& rhs) const {
 		return{ x * rhs.x, y * rhs.y, z * rhs.z };
 	}
@@ -39,6 +43,14 @@ struct vec3 {
 
 	inline float dot(const vec3& rhs) const {
 		return x*rhs.x + y*rhs.y + z*rhs.z;
+	}
+
+	inline vec3 operator*(const bool& rhs) const {
+		if (rhs) {
+			return {x, y, z};
+		} else {
+			return {0.f, 0.f, 0.f};
+		}
 	}
 
 	inline vec3& normalize() {

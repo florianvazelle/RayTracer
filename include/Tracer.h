@@ -8,6 +8,7 @@
 #include "Primitive.h"
 #include "Background.h"
 #include "Sphere.h"
+#include "Light.h"
 #include "Ray.h"
 
 struct Tracer {
@@ -16,7 +17,8 @@ struct Tracer {
 
         Background background;
 
-        std::vector<Primitive *> scene;
+        std::vector<Primitive *> primitives;
+        std::vector<Light> lights;
         Ray light;
 
         Tracer();
@@ -30,7 +32,7 @@ struct Tracer {
         color Trace(const Ray& ray, int depth = 0);
 
         void Occlusion(const Ray &ray);
-        Tracer::Intersection Hit(const Ray& ray);
+        Tracer::Intersection Hit(const Ray &ray);
 
         inline vec3 Reflect(const vec3& I, const vec3& N) const;
 };
