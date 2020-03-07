@@ -74,29 +74,3 @@ int main(int argc, const char* argv[]) {
 
 	return 0;
 }
-
-/*
-	float jitterMatrix[4 * 2] = {
-		-1.0f/4.0f,  3.0f/4.0f,
-		3.0f/4.0f,  1.0f/3.0f,
-		-3.0f/4.0f, -1.0f/4.0f,
-		1.0f/4.0f, -3.0f/4.0f,
-	};
-
-
-
-			for (int sample = 0; sample < 4; ++sample) {
-				ray.origin = {0.f, 0.f, 0.f};
-
-				float x = aspectRatio * 2.f * (float((i + jitterMatrix[2 * sample]) - width / 2) + 0.5f) / width;
-				float y = -2.f * (float((j + jitterMatrix[2 * sample + 1]) - height / 2) + 0.5f) / height;
-
-				ray.direction = {x, y, 1.f};
-				ray.direction.normalize();
-
-				col = col + tracer.Trace(ray);
-			}
-
-			// Get the average.
-			col = col / 4.0f;
-*/
