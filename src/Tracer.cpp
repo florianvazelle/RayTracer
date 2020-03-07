@@ -31,13 +31,13 @@ color Tracer::Trace(const Ray &ray, int depth) {
     Tracer::Intersection intersection = Hit(ray);
 
     if (intersection.primitive != nullptr) {
-        col = {0.5f, 0.5f, 0.75f};
-
         // 1. calcul du point d'intersection
         vec3 position = ray.Evaluate(intersection.distance);
 
         // 2. calcul d'une normal
         vec3 normal = intersection.primitive->CalcNormal(position);
+
+        color diffuse = {0.f, 0.f, 0.f}, specular = {0.f, 0.f, 0.f};
 
         for(Light& l : lights) {
             l.direction = (l.origin - position).normalize();
@@ -48,8 +48,11 @@ color Tracer::Trace(const Ray &ray, int depth) {
             Tracer::Intersection intersectionFeeler = Hit(rayFeeler);
 
             bool vis = (intersectionFeeler.primitive == nullptr);
-            col = col + (l.diffuse(normal) + l.specular(ray, normal)) * vis;
+            diffuse = diffuse + l.diffuse(normal) * vis;
+            specular = specular + l.specular(ray, normal) * vis;
         }
+
+        col = diffuse + specular;
     }
 
     return col;
