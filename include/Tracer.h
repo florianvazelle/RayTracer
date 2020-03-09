@@ -8,6 +8,7 @@
 #include "Primitive.h"
 #include "Background.h"
 #include "Sphere.h"
+#include "Triangle.h"
 #include "Light.h"
 #include "Ray.h"
 

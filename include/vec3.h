@@ -64,6 +64,13 @@ struct vec3 {
 	inline vec3 negated() const {
 		return{ -x, -y, -z };
 	}
+
+	inline vec3 cross(const vec3& v) {
+		return {
+			(y * v.z - z * v.y),
+			-(x * v.z - z * v.x),
+			(x * v.y - y * v.x)};
+	}
 };
 
 // equivalent a typedef vec3 color;

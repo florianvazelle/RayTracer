@@ -16,3 +16,7 @@ float Sphere::Intersect(const Ray &ray) const {
 vec3 Sphere::CalcNormal(const vec3 &p) const {
     return (p - position).normalize();
 }
+
+color Sphere::GetColor(void) const {
+    return col;
+}

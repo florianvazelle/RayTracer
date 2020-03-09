@@ -1,10 +1,11 @@
 #include "Tracer.h"
 
 Tracer::Tracer() {
-    primitives.push_back(new Sphere{{0.f, 0.f, 2.f}, 1.f});
-    primitives.push_back(new Sphere{{2.f, 2.f, 4.f}, 1.f});
+    primitives.push_back(new Sphere{{0.f, 0.f, 2.f}, 1.f, {1.f, .6f, 1.f}});
+    primitives.push_back(new Sphere{{2.f, 2.f, 4.f}, 1.f, {1.f, 1.f, .3f}});
     //scene.push_back(new Sphere{{ -0.5f, -0.5f, 1.f}, 0.2f});
-    primitives.push_back(new Sphere{{-1.f, -0.5f, 2.f}, 0.75f});
+    primitives.push_back(new Sphere{{-1.f, -0.5f, 2.f}, 0.75f, {.2f, .4f, 1.f}});
+    primitives.push_back(new Triangle{{.5f, -0.25f, 1.f}, {-.5f, 0.25f, 1.f}, {-.5f, -0.25f, 1.f}, {.5f, 1.f, .5f}});
 
     Light light;
     light.origin = {1.f, 1.f, 0.f};
@@ -28,16 +29,19 @@ color Tracer::Trace(const Ray &ray, int depth) {
         return col;
     }
 
-    Tracer::Intersection intersection = Hit(ray);
+    Intersection intersection = Hit(ray);
 
     if (intersection.primitive != nullptr) {
+        color ambient = {0.f, 0.f, 0.f}, diffuse = {0.f, 0.f, 0.f}, specular = {0.f, 0.f, 0.f};
+
+        ambient = intersection.primitive->GetColor();
+
         // 1. calcul du point d'intersection
         vec3 position = ray.Evaluate(intersection.distance);
 
         // 2. calcul d'une normal
         vec3 normal = intersection.primitive->CalcNormal(position);
 
-        color diffuse = {0.f, 0.f, 0.f}, specular = {0.f, 0.f, 0.f};
 
         for(Light& l : lights) {
             l.direction = (l.origin - position).normalize();
@@ -45,14 +49,15 @@ color Tracer::Trace(const Ray &ray, int depth) {
             Ray rayFeeler;
             rayFeeler.origin = position + normal * EPSILON;
             rayFeeler.direction = l.direction;
-            Tracer::Intersection intersectionFeeler = Hit(rayFeeler);
+            Intersection intersectionFeeler = Hit(rayFeeler);
 
             bool vis = (intersectionFeeler.primitive == nullptr);
+            ambient = ambient * vis;
             diffuse = diffuse + l.diffuse(normal) * vis;
             specular = specular + l.specular(ray, normal) * vis;
         }
 
-        col = diffuse + specular;
+        col = ambient + diffuse + specular;
     }
 
     return col;
@@ -80,7 +85,7 @@ void Tracer::Occlusion(const Ray &ray) {
 }
 
 Tracer::Intersection Tracer::Hit(const Ray &ray) {
-    Tracer::Intersection intersection{std::numeric_limits<float>::max(), nullptr};
+    Intersection intersection{std::numeric_limits<float>::max(), nullptr};
 
     for (Primitive const *p : primitives) {
         float distance = p->Intersect(ray);
