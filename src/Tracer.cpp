@@ -14,6 +14,8 @@ Tracer::Tracer() {
     light.shininess = 16.0f;
 
     lights.push_back(light);
+    light.origin = {-1.f, 1.f, 0.f};
+    //lights.push_back(light);
 }
 
 Tracer::~Tracer() {
@@ -52,9 +54,30 @@ color Tracer::Trace(const Ray &ray, int depth) {
             Intersection intersectionFeeler = Hit(rayFeeler);
 
             bool vis = (intersectionFeeler.primitive == nullptr);
-            ambient = ambient * vis;
-            diffuse = diffuse + l.diffuse(normal) * vis;
-            specular = specular + l.specular(ray, normal) * vis;
+            ambient = ambient * vis; // TODO : verifier pour plusieurs lumières
+            diffuse += l.diffuse(normal) * vis;
+            specular += l.specular(position, normal) * vis;
+
+            /*float AmbientOcclusion = Occlusion();
+
+            // blinn-phong (in view-space)
+            vec3 ambient = vec3(diffuse * AmbientOcclusion * 0.3f); // here we add occlusion factor
+            vec3 lighting = ambient;
+
+            // diffuse
+            diffuse = l.diffuse(normal);
+
+            // specular
+            specular = l.specular(position, normal);
+
+            // attenuation
+            float dist = intersectionFeeler.distance;
+            float attenuation = 1.0 / (1.0 + 0.09f * dist + 0.032f * dist * dist);
+            diffuse *= attenuation;
+            specular *= attenuation;
+            lighting += diffuse + specular;
+
+            col = lighting;*/
         }
 
         col = ambient + diffuse + specular;

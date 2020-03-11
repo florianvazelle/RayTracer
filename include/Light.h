@@ -14,15 +14,15 @@ struct Light {
     float shininess;
 
     color diffuse(const vec3& normal) {
-        float lambertian = std::max(0.f, normal.dot(direction));
+        float lambertian = std::max(normal.dot(direction), 0.0f);
 
         return diffuseColor * lambertian;
     }
 
-    color specular(const Ray& ray, const vec3& normal) {
-        vec3 view_direction = ray.direction.negated().normalize();
+    color specular(const vec3& position, const vec3& normal) {
+        vec3 view_direction = position.negated().normalize();
         vec3 halfDir = (direction + view_direction).normalize();
-        float specAngle = std::max(halfDir.dot(normal), 0.0f);
+        float specAngle = std::max(normal.dot(halfDir), 0.0f);
         float specular = pow(specAngle, shininess);
 
         return specColor * specular;
